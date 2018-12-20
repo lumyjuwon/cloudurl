@@ -1,48 +1,35 @@
-from abc import *
+from cloud import Cloud
 from bs4 import BeautifulSoup
-from exceptions import *
 import requests
 import re
 
 
-class Cloud(metaclass=ABCMeta):
-    def __init__(self, url):
-        self.url = url
-        self.request = requests.get(self.url)
-        self.confirm_request_url()
-        self.confirm_url(self.url)
+class GoogleCloud(Cloud):
 
-    def conversion_size(self, file, size_type=None):
-        size = int(file['size'])
-        unit = file['unit']
-        standard_unit = {'B': 0, 'K': 10, 'M': 20, 'G': 30, 'T': 40}
-        if size_type is not None:
-            if unit == size_type:
-                return size
-            else:
-                if size_type not in standard_unit.keys():
-                    raise SizeTypeError(size_type)
-                else:
-                    transformed_size = size * pow(2, standard_unit[unit] - standard_unit[size_type])
-                    return transformed_size
-        else:
-            return size
-
-    def get_html(self):
-        document = BeautifulSoup(self.request.content, 'html.parser')
-        return document
-
-    def confirm_request_url(self):
-        if self.request.status_code == 200:
-            if self.request.url != self.url:
-                self.url = self.request.url
-        else:
-            raise InvalidURLError(self.url)
-
-    @abstractmethod
-    def file_size(self, size_type):
-        pass
-
-    @abstractmethod
     def confirm_url(self, url):
-        pass
+        regex = re.compile("d/(.+)/")
+        url_code = regex.findall(url)[0]
+        regex = re.compile("\w+")
+        url_regex_list = regex.findall(url)
+        if "export" in url_regex_list:
+            return
+        elif "view" in url_regex_list:
+            self.url = "https://drive.google.com/uc?id=" + url_code + "&export=download"
+            self.request = requests.get(self.url)
+        elif "edit" in url_regex_list:
+            self.url = "https://drive.google.com/uc?id=" + url_code + "&export=download"
+            self.request = requests.get(self.url)
+
+    def file_size(self, size_type=None):
+        crawled_file = self.get_html().find_all('span', {'class': 'uc-name-size'})[0].find_all(text=True)[1].strip()[1:-1]
+        file = {'size': crawled_file[0:-1], 'unit': crawled_file[-1]}
+        return self.conversion_size(file, size_type)
+
+
+if "__main__" == __name__:
+    google = GoogleCloud("https://drive.google.com/file/d/1yNuTQSSSpnyU6h_udILEAwQuWFkXLNO6/view")
+    print(google.file_size('T'))
+    print(google.file_size('G'))
+    print(google.file_size('M'))
+    print(google.file_size('K'))
+    print(google.file_size('B'))
