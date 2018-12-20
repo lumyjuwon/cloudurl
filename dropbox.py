@@ -16,7 +16,7 @@ class DropBox(Cloud):
         # return self.conversion_size(file, size_type)
         pass
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     db = DropBox("https://www.dropbox.com/s/1rrmsgk8sv6n9xs/Dropbox%20%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0.pdf?dl=0")
     # print(db.file_size('T'))
     # print(db.file_size('G'))
