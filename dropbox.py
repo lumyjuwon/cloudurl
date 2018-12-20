@@ -11,6 +11,11 @@ class DropBox(Cloud):
         if url_split[2] == 'www.dropbox.com' and url_split[3] == 's':
             self.url = url
             self.request = requests.get(self.url)
+        elif url_split[0] == 'www.dropbox.com' and url_split[1] == 's':
+            self.url = "https://" + url
+            self.request = requests.get(self.url)
+        else:
+            pass
 
     def file_size(self, size_type=None):
         # return self.conversion_size(file, size_type)
