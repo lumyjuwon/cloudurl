@@ -37,12 +37,19 @@ class Cloud(metaclass=ABCMeta):
             if self.request.url != self.url:
                 self.url = self.request.url
         else:
-            raise InvalidURLError(self.url)
+            raise InvalidUrl(self.url)
 
     @abstractmethod
     def file_size(self, size_type):
         pass
 
     @abstractmethod
+    def direct_link(self):
+        pass
+
+    @abstractmethod
     def confirm_url(self, url):
         pass
+    
+
+
